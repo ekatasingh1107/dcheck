@@ -12,9 +12,20 @@ import json
 from itertools import product
 from string import ascii_lowercase
 from termcolor import colored
+import random
+import nltk
+from nltk.corpus import words
 
 delay = 1 #Delay between requests (GoDaddy rate limit is 1 per sec)
 errorDelay = 15 #Delay when rate limit is reached
+
+def generate_domain_name_candidates(word_list):
+    vowels = ['a', 'e', 'i', 'o', 'u']
+    domain_candidates = []
+    for word in word_list:
+        for vowel in vowels:
+            domain_candidates.append(word + vowel)
+    return domain_candidates
 
 def checkDomain(domain, apiKey, apiSecret):
     url = "https://api.ote-godaddy.com/v1/domains/available?domain=" + str(domain) + "&checkType=FAST&forTransfer=false"
@@ -164,7 +175,7 @@ def parseMulipleDomains(full, outFile, apiKey, apiSecret):
             else:
                 if mode == "both" or mode == "debug": print(colored(str(domain['domain'] + " is not available"), 'red'))
         time.sleep(delay)
-    
+
 def run(domains, tlds, outFile, rand, bulk, apiKey, apiSecret):
     if mode == 'debug': print("Out file: " + str(outFile))
     print("Checking " + str(len(domains) * len(tlds)) + " domains...")
@@ -198,7 +209,7 @@ def run(domains, tlds, outFile, rand, bulk, apiKey, apiSecret):
                         time.sleep(10)
                 else:
                     parseMulipleDomains(domains, outFile, apiKey, apiSecret)
-        else: 
+        else:
             if mode == 'debug': print("Single mode")
             if rand:
                 if mode == 'debug': print("Selecting in random order")
@@ -236,7 +247,7 @@ def run(domains, tlds, outFile, rand, bulk, apiKey, apiSecret):
                     for domain in domains:
                             full.append(domain + "." + tld)
                     parseMulipleDomains(full, outFile, apiKey, apiSecret)
-            else: 
+            else:
                 if mode == 'debug': print("Single mode")
                 if rand:
                     if mode == 'debug': print("Selecting in random order")
@@ -262,12 +273,12 @@ def domainListFromFile(file):
         print(colored(str("Error: " + file + " doesn't exist"), 'red'))
         exit(0)
 
-def generateDomainList(length, characters):
-    if length > 64:
-        print("Error: Can't generate domains larger than 64 Characters")
-        exit(2)
-    domains = [''.join(x) for x in product(characters, repeat=length)]
-    return domains
+# def generateDomainList(length, characters):
+#     if length > 64:
+#         print("Error: Can't generate domains larger than 64 Characters")
+#         exit(2)
+#     domains = [''.join(x) for x in product(characters, repeat=length)]
+#     return domains
 
 def getTldFromFile(file):
     if os.path.exists(file):
@@ -324,7 +335,7 @@ def main():
     global mode
     global group
     #Enter your GoDaddy API Key and API Secret here:
-    apiKey = "" 
+    apiKey = ""
     apiSecret = ""
     argv = sys.argv[1:]
     tldArg = ''
@@ -391,10 +402,10 @@ def main():
     #print(mode)
 
     if(len(apiKey) == 0 or len(apiSecret) == 0):
-        apiKey = os.getenv('apiKey') 
+        apiKey = os.getenv('apiKey')
         apiSecret = os.getenv('apiSecret')
         if(apiKey == None or apiSecret == None):
-            apiKey = os.getenv('APIKEY') 
+            apiKey = os.getenv('APIKEY')
             apiSecret = os.getenv('APISECRET')
             if(apiKey == None or apiSecret == None):
                 print(colored("Error: You need to specify your GoDaddy API Key and Secret with the --key and --secret argument", 'red'))
@@ -419,7 +430,7 @@ def main():
 
     #Check if one tld specified, if not get tlds from file
     if tldArg is not '':
-        tld = tldArg.split()     
+        tld = tldArg.split()
     else:
         if tldFile is not '':
             if mode == 'debug': print("Loading TLDs from file: " + tldFile)
@@ -429,7 +440,7 @@ def main():
 
     if rand == "true" or rand == "":
         rand = True
-    else: 
+    else:
         rand = False
 
     if bulk == "true" or bulk == "":
@@ -450,7 +461,10 @@ def main():
         if options is '':
             options = ascii_lowercase
         if mode == 'debug': print("Generating domains with length " + str(length) + " and characters: " + options)
-        domains = generateDomainList(int(length), options)
+        # domains = generateDomainList(int(length), options)
+        english_words = set(words.words())
+        eng_words = [word for word in english_words if len(word) <= 5]
+        domains = generate_domain_name_candidates(eng_words)
         if reverse == 'true' or reverse == '':
             if mode == 'debug': print("Running in reverse")
             domains.reverse()

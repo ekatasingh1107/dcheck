@@ -17,7 +17,7 @@ delay = 1 #Delay between requests (GoDaddy rate limit is 1 per sec)
 errorDelay = 15 #Delay when rate limit is reached
 
 def checkDomain(domain, apiKey, apiSecret):
-    url = "https://api.godaddy.com/v1/domains/available?domain=" + str(domain) + "&checkType=FAST&forTransfer=false"
+    url = "https://api.ote-godaddy.com/v1/domains/available?domain=" + str(domain) + "&checkType=FAST&forTransfer=false"
     payload = {}
     headers = {
     'accept': 'application/json',

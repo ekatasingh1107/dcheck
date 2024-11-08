@@ -23,8 +23,8 @@ def generate_domain_name_candidates(word_list):
     vowels = ['a', 'e', 'i', 'o', 'u']
     domain_candidates = []
     for word in word_list:
-        for vowel in vowels:
-            domain_candidates.append(word + vowel)
+        #for vowel in vowels:
+            domain_candidates.append(word)
     return domain_candidates
 
 def checkDomain(domain, apiKey, apiSecret):
